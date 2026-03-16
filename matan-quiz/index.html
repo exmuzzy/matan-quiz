@@ -269,7 +269,7 @@ async function startQuiz() {
     renderTopicNav();
   } catch(err) {
     document.getElementById('question-container').innerHTML =
-      '<p style="color:var(--red)">Ошибка загрузки: ' + err.message + '</p>';
+      '<p style="color:var(--red)">Ошибка: ' + err.message + '</p>';
   }
 }
 

@@ -1612,6 +1612,161 @@ function fetchReport() {
 
 # ─── Helper ──────────────────────────────────────────────────────────────────
 
+ENGLISH_DATA_DIR = "/var/www/english_data"
+ENGLISH_TEACHER_KEY = "eNg7LkQ2w5"
+
+ENGLISH_QUESTIONS = [
+    # ── Grammar: Tenses ──────────────────────────────────────────────────────
+    {"id":1,"topic":"Tenses","text":"I ___ (work) here since 2019.","options":["work","am working","have worked","had worked"],"answer":"C"},
+    {"id":2,"topic":"Tenses","text":"By the time we arrived, the film ___.","options":["already started","has already started","had already started","already starts"],"answer":"C"},
+    {"id":3,"topic":"Tenses","text":"She ___ to Paris three times so far.","options":["has been","was","had been","is"],"answer":"A"},
+    {"id":4,"topic":"Tenses","text":"This time tomorrow I ___ on the beach.","options":["will lie","will be lying","am lying","lie"],"answer":"B"},
+    {"id":5,"topic":"Tenses","text":"He ___ the report before the meeting started.","options":["finished","has finished","had finished","was finishing"],"answer":"C"},
+    {"id":6,"topic":"Tenses","text":"We ___ each other for ten years next month.","options":["will know","will have known","are knowing","have known"],"answer":"B"},
+    {"id":7,"topic":"Tenses","text":"I ___ about calling you when you rang.","options":["just thought","was just thinking","have just thought","had just thought"],"answer":"B"},
+    {"id":8,"topic":"Tenses","text":"She ___ three cups of coffee today.","options":["drank","has drunk","drinks","is drinking"],"answer":"B"},
+    {"id":9,"topic":"Tenses","text":"By 2030 they ___ the new bridge.","options":["will build","will have built","are building","build"],"answer":"B"},
+    {"id":10,"topic":"Tenses","text":"I ___ my keys — can you help me find them?","options":["lost","have lost","lose","was losing"],"answer":"B"},
+
+    # ── Grammar: Conditionals ────────────────────────────────────────────────
+    {"id":11,"topic":"Conditionals","text":"If I ___ you, I would accept the offer.","options":["am","was","were","be"],"answer":"C"},
+    {"id":12,"topic":"Conditionals","text":"If she had studied harder, she ___ the exam.","options":["would pass","would have passed","will pass","passes"],"answer":"B"},
+    {"id":13,"topic":"Conditionals","text":"Unless you ___, you'll miss the train.","options":["hurry","won't hurry","don't hurry","hurried"],"answer":"A"},
+    {"id":14,"topic":"Conditionals","text":"If it rains tomorrow, we ___ at home.","options":["stay","will stay","would stay","stayed"],"answer":"B"},
+    {"id":15,"topic":"Conditionals","text":"I wish I ___ more time for hobbies.","options":["have","had","would have","will have"],"answer":"B"},
+    {"id":16,"topic":"Conditionals","text":"If only she ___ me about the party!","options":["tells","told","had told","would tell"],"answer":"C"},
+    {"id":17,"topic":"Conditionals","text":"Provided that you ___ hard, you'll succeed.","options":["work","will work","worked","would work"],"answer":"A"},
+    {"id":18,"topic":"Conditionals","text":"Were I ___ the answer, I would tell you.","options":["know","to know","knowing","knew"],"answer":"B"},
+    {"id":19,"topic":"Conditionals","text":"If I hadn't been so tired, I ___ to the party.","options":["will go","would go","would have gone","went"],"answer":"C"},
+    {"id":20,"topic":"Conditionals","text":"Suppose you ___ a million dollars, what would you do?","options":["win","won","had won","will win"],"answer":"B"},
+
+    # ── Grammar: Passive Voice ───────────────────────────────────────────────
+    {"id":21,"topic":"Passive Voice","text":"The cake ___ by my grandmother yesterday.","options":["was baked","baked","is baked","has baked"],"answer":"A"},
+    {"id":22,"topic":"Passive Voice","text":"A new hospital ___ in our city now.","options":["is built","is being built","was built","has been built"],"answer":"B"},
+    {"id":23,"topic":"Passive Voice","text":"The letter ___ yet.","options":["hasn't been sent","wasn't sent","isn't sent","didn't send"],"answer":"A"},
+    {"id":24,"topic":"Passive Voice","text":"The window ___ by the children playing football.","options":["broke","was broken","has broken","is breaking"],"answer":"B"},
+    {"id":25,"topic":"Passive Voice","text":"English ___ all over the world.","options":["speaks","is spoken","is speaking","has spoken"],"answer":"B"},
+
+    # ── Grammar: Modal Verbs ─────────────────────────────────────────────────
+    {"id":26,"topic":"Modal Verbs","text":"You ___ be tired after such a long flight.","options":["must","can","should","would"],"answer":"A"},
+    {"id":27,"topic":"Modal Verbs","text":"She ___ have left already — her car is gone.","options":["must","can","should","would"],"answer":"A"},
+    {"id":28,"topic":"Modal Verbs","text":"You ___ have told me earlier!","options":["must","should","can","would"],"answer":"B"},
+    {"id":29,"topic":"Modal Verbs","text":"___ I borrow your pen, please?","options":["May","Must","Should","Would"],"answer":"A"},
+    {"id":30,"topic":"Modal Verbs","text":"He ___ swim when he was five.","options":["can","could","may","must"],"answer":"B"},
+    {"id":31,"topic":"Modal Verbs","text":"You ___ park here — it's a no-parking zone.","options":["mustn't","don't have to","shouldn't","needn't"],"answer":"A"},
+    {"id":32,"topic":"Modal Verbs","text":"You ___ finish the report today; tomorrow is fine.","options":["mustn't","don't have to","can't","shouldn't"],"answer":"B"},
+    {"id":33,"topic":"Modal Verbs","text":"She ___ be at home — I just saw her at the shop.","options":["can't","mustn't","shouldn't","needn't"],"answer":"A"},
+    {"id":34,"topic":"Modal Verbs","text":"We ___ to wear a uniform at school.","options":["must","have","should","ought"],"answer":"B"},
+    {"id":35,"topic":"Modal Verbs","text":"You ___ to apologise — it wasn't your fault.","options":["needn't","mustn't","don't need","shouldn't"],"answer":"C"},
+
+    # ── Grammar: Reported Speech ─────────────────────────────────────────────
+    {"id":36,"topic":"Reported Speech","text":"She said she ___ the film the day before.","options":["has seen","saw","had seen","sees"],"answer":"C"},
+    {"id":37,"topic":"Reported Speech","text":"He told me he ___ help me the next day.","options":["will","would","can","shall"],"answer":"B"},
+    {"id":38,"topic":"Reported Speech","text":"'I'm leaving tomorrow,' she said. → She said she ___ leaving ___.","options":["was / the next day","is / tomorrow","was / tomorrow","is / the next day"],"answer":"A"},
+    {"id":39,"topic":"Reported Speech","text":"He asked me where I ___.","options":["live","lived","am living","do live"],"answer":"B"},
+    {"id":40,"topic":"Reported Speech","text":"She asked if I ___ come to her party.","options":["can","could","will","may"],"answer":"B"},
+
+    # ── Grammar: Relative Clauses ────────────────────────────────────────────
+    {"id":41,"topic":"Relative Clauses","text":"The man ___ lives next door is a doctor.","options":["who","which","whom","whose"],"answer":"A"},
+    {"id":42,"topic":"Relative Clauses","text":"The book ___ I bought yesterday is amazing.","options":["who","which","whose","whom"],"answer":"B"},
+    {"id":43,"topic":"Relative Clauses","text":"That's the woman ___ son won the competition.","options":["who","which","whose","whom"],"answer":"C"},
+    {"id":44,"topic":"Relative Clauses","text":"The restaurant ___ we had dinner was excellent.","options":["which","where","that","whose"],"answer":"B"},
+    {"id":45,"topic":"Relative Clauses","text":"Is that the reason ___ you left early?","options":["which","where","why","when"],"answer":"C"},
+
+    # ── Grammar: Articles ────────────────────────────────────────────────────
+    {"id":46,"topic":"Articles","text":"I'd like ___ apple, please.","options":["a","an","the","—"],"answer":"B"},
+    {"id":47,"topic":"Articles","text":"___ Nile is the longest river in Africa.","options":["A","An","The","—"],"answer":"C"},
+    {"id":48,"topic":"Articles","text":"She plays ___ piano beautifully.","options":["a","an","the","—"],"answer":"C"},
+    {"id":49,"topic":"Articles","text":"___ life is beautiful.","options":["A","The","An","—"],"answer":"D"},
+    {"id":50,"topic":"Articles","text":"He is ___ honest person.","options":["a","an","the","—"],"answer":"B"},
+
+    # ── Vocabulary: Phrasal Verbs ────────────────────────────────────────────
+    {"id":51,"topic":"Phrasal Verbs","text":"Can you <b>turn down</b> the music? It means:","options":["Make louder","Make quieter","Turn off","Change"],"answer":"B"},
+    {"id":52,"topic":"Phrasal Verbs","text":"I need to <b>look into</b> this problem. It means:","options":["Ignore","Investigate","Watch","Create"],"answer":"B"},
+    {"id":53,"topic":"Phrasal Verbs","text":"She <b>gave up</b> smoking last year. It means:","options":["Started","Continued","Stopped","Enjoyed"],"answer":"C"},
+    {"id":54,"topic":"Phrasal Verbs","text":"We had to <b>put off</b> the meeting. It means:","options":["Cancel","Postpone","Attend","Organise"],"answer":"B"},
+    {"id":55,"topic":"Phrasal Verbs","text":"I can't <b>make out</b> what he's saying. It means:","options":["Hear clearly","Understand","See","Write"],"answer":"B"},
+    {"id":56,"topic":"Phrasal Verbs","text":"Please <b>fill in</b> the form. It means:","options":["Throw away","Complete","Read","Sign"],"answer":"B"},
+    {"id":57,"topic":"Phrasal Verbs","text":"The plane <b>took off</b> on time. It means:","options":["Landed","Departed","Crashed","Arrived"],"answer":"B"},
+    {"id":58,"topic":"Phrasal Verbs","text":"I <b>came across</b> an old photo. It means:","options":["Lost","Found by chance","Threw away","Bought"],"answer":"B"},
+    {"id":59,"topic":"Phrasal Verbs","text":"She <b>broke down</b> in tears. It means:","options":["Laughed","Smiled","Started crying","Fell asleep"],"answer":"C"},
+    {"id":60,"topic":"Phrasal Verbs","text":"He <b>turned out</b> to be right. It means:","options":["Proved to be","Decided","Refused","Pretended"],"answer":"A"},
+
+    # ── Vocabulary: Word Formation ───────────────────────────────────────────
+    {"id":61,"topic":"Word Formation","text":"The opposite of 'possible' is:","options":["unpossible","impossible","dispossible","inpossible"],"answer":"B"},
+    {"id":62,"topic":"Word Formation","text":"The noun form of 'decide' is:","options":["decidement","decidion","decision","deciding"],"answer":"C"},
+    {"id":63,"topic":"Word Formation","text":"The adjective form of 'beauty' is:","options":["beautious","beautyful","beautiful","beautied"],"answer":"C"},
+    {"id":64,"topic":"Word Formation","text":"The noun form of 'achieve' is:","options":["achieval","achievement","achieveness","achieving"],"answer":"B"},
+    {"id":65,"topic":"Word Formation","text":"'Care' + suffix = full of care:","options":["careless","careful","caring","cared"],"answer":"B"},
+
+    # ── Vocabulary: Collocations ─────────────────────────────────────────────
+    {"id":66,"topic":"Collocations","text":"We need to ___ a decision quickly.","options":["do","make","take","get"],"answer":"B"},
+    {"id":67,"topic":"Collocations","text":"She ___ a mistake on the test.","options":["did","made","had","took"],"answer":"B"},
+    {"id":68,"topic":"Collocations","text":"Can you ___ me a favour?","options":["make","give","do","take"],"answer":"C"},
+    {"id":69,"topic":"Collocations","text":"He ___ his best to help us.","options":["made","did","got","took"],"answer":"B"},
+    {"id":70,"topic":"Collocations","text":"I'd like to ___ a complaint.","options":["do","make","give","put"],"answer":"B"},
+
+    # ── Grammar: Prepositions ────────────────────────────────────────────────
+    {"id":71,"topic":"Prepositions","text":"I'm interested ___ learning Japanese.","options":["at","on","in","for"],"answer":"C"},
+    {"id":72,"topic":"Prepositions","text":"She's been waiting ___ the bus for 20 minutes.","options":["to","for","on","at"],"answer":"B"},
+    {"id":73,"topic":"Prepositions","text":"He apologised ___ being late.","options":["about","for","of","to"],"answer":"B"},
+    {"id":74,"topic":"Prepositions","text":"I'm not used ___ getting up early.","options":["for","to","at","with"],"answer":"B"},
+    {"id":75,"topic":"Prepositions","text":"She depends ___ her parents financially.","options":["from","of","on","at"],"answer":"C"},
+
+    # ── Grammar: Gerund vs Infinitive ────────────────────────────────────────
+    {"id":76,"topic":"Gerund / Infinitive","text":"I enjoy ___ in the rain.","options":["walk","to walk","walking","walked"],"answer":"C"},
+    {"id":77,"topic":"Gerund / Infinitive","text":"She decided ___ a new car.","options":["buying","to buy","buy","bought"],"answer":"B"},
+    {"id":78,"topic":"Gerund / Infinitive","text":"He avoided ___ the question.","options":["to answer","answering","answer","answered"],"answer":"B"},
+    {"id":79,"topic":"Gerund / Infinitive","text":"I can't afford ___ a new house.","options":["buying","to buy","buy","bought"],"answer":"B"},
+    {"id":80,"topic":"Gerund / Infinitive","text":"She suggested ___ to the cinema.","options":["to go","going","go","went"],"answer":"B"},
+
+    # ── Grammar: Comparatives & Superlatives ─────────────────────────────────
+    {"id":81,"topic":"Comparatives","text":"This book is ___ than the last one.","options":["more interesting","interestinger","most interesting","the interesting"],"answer":"A"},
+    {"id":82,"topic":"Comparatives","text":"She is the ___ student in the class.","options":["most clever","cleverest","more clever","clever"],"answer":"B"},
+    {"id":83,"topic":"Comparatives","text":"The ___ you study, the ___ you'll get.","options":["harder / better","more hard / more good","hardest / best","most hard / most good"],"answer":"A"},
+    {"id":84,"topic":"Comparatives","text":"This is ___ film I've ever seen.","options":["the worst","the worse","worse","bad"],"answer":"A"},
+    {"id":85,"topic":"Comparatives","text":"My car is not as ___ as yours.","options":["fast","faster","fastest","more fast"],"answer":"A"},
+
+    # ── Reading: Linking Words ───────────────────────────────────────────────
+    {"id":86,"topic":"Linking Words","text":"___ the rain, we went for a walk.","options":["Despite","Although","Because","However"],"answer":"A"},
+    {"id":87,"topic":"Linking Words","text":"He failed the exam ___ he didn't study enough.","options":["although","because","despite","however"],"answer":"B"},
+    {"id":88,"topic":"Linking Words","text":"She's very talented. ___, she's also hardworking.","options":["Moreover","However","Although","Despite"],"answer":"A"},
+    {"id":89,"topic":"Linking Words","text":"I was tired. ___, I finished the project.","options":["Moreover","Therefore","Nevertheless","Because"],"answer":"C"},
+    {"id":90,"topic":"Linking Words","text":"___ having a headache, she went to work.","options":["Although","Despite","However","Because"],"answer":"B"},
+
+    # ── Grammar: Used to / Would ─────────────────────────────────────────────
+    {"id":91,"topic":"Used to / Would","text":"I ___ live in London when I was a child.","options":["used to","would","use to","was used to"],"answer":"A"},
+    {"id":92,"topic":"Used to / Would","text":"She ___ play tennis every weekend. (repeated action)","options":["used to","would","use to","is used to"],"answer":"B"},
+    {"id":93,"topic":"Used to / Would","text":"I'm ___ waking up early now.","options":["used to","use to","would","got used to"],"answer":"A"},
+    {"id":94,"topic":"Used to / Would","text":"He didn't ___ like vegetables.","options":["used to","use to","would","get used to"],"answer":"B"},
+    {"id":95,"topic":"Used to / Would","text":"It took me a while to ___ the cold weather.","options":["used to","use to","get used to","would"],"answer":"C"},
+
+    # ── Vocabulary: Confusing Words ──────────────────────────────────────────
+    {"id":96,"topic":"Confusing Words","text":"The news ___ very surprising.","options":["was","were","are","have been"],"answer":"A"},
+    {"id":97,"topic":"Confusing Words","text":"I need some ___ about the course.","options":["informations","information","an information","the informations"],"answer":"B"},
+    {"id":98,"topic":"Confusing Words","text":"She gave me a good piece of ___.","options":["advise","advice","advices","advises"],"answer":"B"},
+    {"id":99,"topic":"Confusing Words","text":"There are ___ people in the park.","options":["few","a few","little","a little"],"answer":"B"},
+    {"id":100,"topic":"Confusing Words","text":"I have ___ money left.","options":["few","a few","little","a little"],"answer":"D"},
+]
+
+def english_student_path(name):
+    return os.path.join(ENGLISH_DATA_DIR, safe_filename(name) + ".json")
+
+
+def load_all_english_students():
+    students = []
+    if not os.path.isdir(ENGLISH_DATA_DIR):
+        return students
+    for fname in os.listdir(ENGLISH_DATA_DIR):
+        if fname.endswith(".json"):
+            try:
+                with open(os.path.join(ENGLISH_DATA_DIR, fname), "r", encoding="utf-8") as f:
+                    students.append(json.load(f))
+            except Exception:
+                pass
+    return students
+
+
 def safe_filename(name: str) -> str:
     name = name.strip()[:60]
     name = re.sub(r'[^\w\s\-]', '', name, flags=re.UNICODE)
@@ -1741,6 +1896,7 @@ def matan_save():
     if not name:
         return jsonify({"ok": False, "error": "name required"}), 400
     os.makedirs(MATAN_DATA_DIR, exist_ok=True)
+    os.makedirs(ENGLISH_DATA_DIR, exist_ok=True)
     path = matan_path(name)
 
     if "sections" in data and isinstance(data["sections"], dict):
@@ -1781,7 +1937,392 @@ def matan_theory():
         return jsonify({'paragraphs': []})
 
 
+
+
+# ─── English Quiz Routes ─────────────────────────────────────────────────────
+
+ENGLISH_HTML = """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>English B1-B2 Quiz</title>
+<style>
+  :root { --bg:#0f1419; --card:#1a2332; --border:#2d3a4f; --accent:#58a6ff;
+    --accent-dim:rgba(88,166,255,.15); --green:#3fb950; --red:#f85149;
+    --text:#e6edf3; --muted:#8b949e; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,sans-serif;
+    min-height:100vh; line-height:1.5; }
+  .container { max-width:640px; margin:0 auto; padding:32px 20px; }
+  h1 { font-size:1.5rem; font-weight:600; margin-bottom:6px; }
+  .subtitle { color:var(--muted); font-size:.9rem; margin-bottom:24px; }
+  input[type=text] { width:100%; padding:12px 16px; border-radius:8px; border:1px solid var(--border);
+    background:var(--card); color:var(--text); font-size:1rem; margin-bottom:16px; outline:none; }
+  input:focus { border-color:var(--accent); }
+  button { padding:12px 24px; border-radius:8px; border:none; font-size:.95rem;
+    cursor:pointer; background:var(--accent); color:#fff; font-weight:600;
+    transition:opacity .15s; }
+  button:hover { opacity:.85; }
+  .progress-text { color:var(--muted); font-size:.85rem; margin-bottom:8px; }
+  .progress-bar { height:4px; background:var(--border); border-radius:2px; margin-bottom:16px; }
+  .progress-fill { height:100%; background:var(--accent); border-radius:2px; transition:width .2s; }
+  .question-card { background:var(--card); border-radius:12px; padding:24px; }
+  .question-num { color:var(--muted); font-size:.8rem; margin-bottom:8px; }
+  .question-text { font-size:1.05rem; margin-bottom:16px; line-height:1.6; }
+  .options { display:flex; flex-direction:column; gap:8px; }
+  .option { display:flex; align-items:center; gap:12px; padding:12px 16px; border-radius:8px;
+    border:1px solid var(--border); cursor:pointer; transition:background .15s,border-color .15s; }
+  .option:hover { background:var(--accent-dim); border-color:var(--accent); }
+  .option.selected { background:var(--accent-dim); border-color:var(--accent); }
+  .option-label { display:flex; align-items:center; justify-content:center; width:28px; height:28px;
+    border-radius:6px; background:var(--border); font-weight:600; font-size:.85rem; flex-shrink:0; }
+  .option.selected .option-label { background:var(--accent); color:#fff; }
+  .nav-buttons { display:flex; gap:12px; flex-wrap:wrap; }
+  .btn-secondary { background:var(--card); border:1px solid var(--border); color:var(--text); }
+  .btn-secondary:hover { opacity:1; border-color:var(--accent); }
+  .btn-finish { background:var(--green); }
+  .result-card { background:var(--card); border-radius:12px; padding:32px; text-align:center; margin-bottom:24px; }
+  .score-big { font-size:3rem; font-weight:700; margin:16px 0; }
+  .score-label { color:var(--muted); }
+  table { width:100%; border-collapse:collapse; margin-top:16px; }
+  th,td { text-align:left; padding:10px 14px; border-bottom:1px solid var(--border); }
+  th { color:var(--muted); font-size:.85rem; font-weight:500; }
+  .badge { display:inline-block; padding:3px 10px; border-radius:99px; font-size:.8rem; font-weight:600; }
+  .badge-green { background:rgba(34,197,94,.2); color:var(--green); }
+  .badge-yellow { background:rgba(234,179,8,.2); color:#eab308; }
+  .badge-red { background:rgba(239,68,68,.2); color:var(--red); }
+  .btn-sm { padding:6px 14px; font-size:.82rem; margin-right:4px; }
+  .btn-outline { background:transparent; border:1px solid var(--accent); color:var(--accent); }
+  .stat-row { display:flex; gap:24px; flex-wrap:wrap; margin:16px 0; }
+  .stat-box { background:var(--card); border-radius:10px; padding:16px 24px; flex:1; min-width:140px; }
+  .stat-val { font-size:1.8rem; font-weight:700; }
+  .stat-lbl { color:var(--muted); font-size:.82rem; }
+  .answer-card { background:var(--card); border-radius:10px; padding:20px; margin-bottom:14px; }
+  .answer-status { font-size:.82rem; font-weight:600; margin-bottom:8px; }
+  .answer-status.ok { color:var(--green); }
+  .answer-status.fail { color:var(--red); }
+  .answer-status.skip { color:var(--muted); }
+  .given-answer { margin-top:6px; font-size:.9rem; }
+  .correct-answer { margin-top:4px; font-size:.9rem; color:var(--green); }
+  .jump-grid { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:20px; }
+  .jump-btn { width:34px; height:34px; border-radius:6px; font-size:.78rem; padding:0;
+    background:var(--card); border:1px solid var(--border); color:var(--muted); }
+  .jump-btn.answered { background:rgba(59,130,246,.25); border-color:var(--accent); color:var(--text); }
+  .jump-btn.current { border-color:var(--accent); color:var(--accent); font-weight:700; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div id="name-screen">
+  <h1>🇬🇧 English B1-B2 Quiz</h1>
+  <p class="subtitle">100 questions · Grammar & Vocabulary · Good luck!</p>
+  <input type="text" id="student-name" placeholder="Enter your first and last name" maxlength="60">
+  <br>
+  <button id="btn-start" onclick="startQuiz()">Start Quiz</button>
+</div>
+
+<div id="quiz-screen" style="display:none">
+  <h1>🇬🇧 English B1-B2 Quiz</h1>
+  <p class="subtitle" id="quiz-student-name"></p>
+  <p class="progress-text" id="progress-text"></p>
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+  <div class="jump-grid" id="jump-grid"></div>
+  <div id="question-container"></div>
+  <div class="nav-buttons" style="margin-top:12px">
+    <button class="btn-secondary" onclick="prevQ()">← Back</button>
+    <button class="btn-secondary" onclick="nextQ()">Next →</button>
+    <button class="btn-finish" onclick="finishQuiz()">Finish Quiz</button>
+  </div>
+</div>
+
+<div id="result-screen" style="display:none">
+  <div class="result-card">
+    <h1>Result</h1>
+    <div class="score-big" id="result-score"></div>
+    <div class="score-label">correct answers out of 100</div>
+    <p style="margin-top:16px;color:var(--muted)" id="result-msg"></p>
+  </div>
+  <button onclick="viewMyAnswers()">View my answers</button>
+</div>
+
+<div id="view-screen" style="display:none">
+  <div id="view-content"><p style="color:var(--muted)">Loading…</p></div>
+</div>
+
+<div id="teacher-screen" style="display:none">
+  <div id="teacher-content"><p style="color:var(--muted)">Loading…</p></div>
+</div>
+
+</div>
+
+<script>
+const QUESTIONS = __QUESTIONS_JSON__;
+const TEACHER_MODE = __TEACHER_MODE__;
+const VIEW_STUDENT = __VIEW_STUDENT__;
+const TEACHER_KEY_VAL = __TEACHER_KEY__;
+
+let currentQ = 0;
+let answers = {};
+let studentName = '';
+let startedAt = '';
+
+window.onload = function() {
+  if (TEACHER_MODE) { showTeacherList(); return; }
+  if (VIEW_STUDENT) { showViewScreen(VIEW_STUDENT, false); return; }
+  document.getElementById('name-screen').style.display = 'block';
+  document.getElementById('student-name').addEventListener('keydown', e => {
+    if (e.key === 'Enter') startQuiz();
+  });
+};
+
+function startQuiz() {
+  const n = document.getElementById('student-name').value.trim();
+  if (!n) { alert('Please enter your name!'); return; }
+  studentName = n;
+  startedAt = new Date().toISOString();
+  document.getElementById('name-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  document.getElementById('quiz-student-name').textContent = n;
+  renderJumpGrid();
+  renderQuestion();
+}
+
+function renderJumpGrid() {
+  const grid = document.getElementById('jump-grid');
+  grid.innerHTML = QUESTIONS.map((q,i) => {
+    const ans = answers[q.id];
+    const cls = i === currentQ ? 'jump-btn current' : ans ? 'jump-btn answered' : 'jump-btn';
+    return '<button class="'+cls+'" onclick="goToQ('+i+')">'+q.id+'</button>';
+  }).join('');
+}
+
+function goToQ(i) { currentQ = i; renderQuestion(); renderJumpGrid(); }
+
+function renderQuestion() {
+  const q = QUESTIONS[currentQ];
+  const total = QUESTIONS.length;
+  document.getElementById('progress-text').textContent =
+    'Question '+(currentQ+1)+' of '+total+'  ·  Answered: '+Object.keys(answers).length;
+  document.getElementById('progress-fill').style.width = ((currentQ+1)/total*100)+'%';
+
+  let html = '<div class="question-card"><div class="question-num">Question '+q.id+' · '+q.topic+'</div><div class="question-text">'+q.text+'</div><div class="options">';
+  q.options.forEach((opt, i) => {
+    const label = ['A','B','C','D'][i];
+    const sel = answers[q.id] === label ? ' selected' : '';
+    html += '<div class="option'+sel+'" onclick="selectAnswer('+q.id+",\'"+label+"\',this)"+'">'
+      + '<span class="option-label">'+label+'</span><span>'+opt+'</span></div>';
+  });
+  html += '</div></div>';
+  document.getElementById('question-container').innerHTML = html;
+}
+
+function selectAnswer(qid, label, el) {
+  answers[qid] = label;
+  document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('progress-text').textContent =
+    'Question '+(currentQ+1)+' of '+QUESTIONS.length+'  ·  Answered: '+Object.keys(answers).length;
+  renderJumpGrid();
+}
+
+function prevQ() { if (currentQ > 0) { currentQ--; renderQuestion(); renderJumpGrid(); } }
+function nextQ() { if (currentQ < QUESTIONS.length-1) { currentQ++; renderQuestion(); renderJumpGrid(); } }
+
+function finishQuiz() {
+  const unanswered = QUESTIONS.length - Object.keys(answers).length;
+  if (unanswered > 0) {
+    if (!confirm('Unanswered: '+unanswered+'. Finish anyway?')) return;
+  }
+  const score = QUESTIONS.filter(q => answers[q.id] === q.answer).length;
+  const payload = {
+    name: studentName, started_at: startedAt,
+    finished_at: new Date().toISOString(),
+    answers: answers, score: score, total: QUESTIONS.length
+  };
+  fetch('/english_check/save', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(payload)
+  }).then(r => r.json()).then(d => {
+    if (d.ok) {
+      document.getElementById('quiz-screen').style.display = 'none';
+      document.getElementById('result-screen').style.display = 'block';
+      document.getElementById('result-score').textContent = d.score;
+      const pct = Math.round(d.score/QUESTIONS.length*100);
+      document.getElementById('result-msg').textContent =
+        pct >= 85 ? 'Excellent!' : pct >= 70 ? 'Good job!' : pct >= 50 ? 'Not bad, keep practising!' : 'You need more practice!';
+      window._savedName = studentName;
+    } else { alert('Save error: '+(d.error||'?')); }
+  }).catch(() => alert('Network error'));
+}
+
+function viewMyAnswers() {
+  document.getElementById('result-screen').style.display = 'none';
+  showViewScreen(window._savedName, false);
+}
+
+function showViewScreen(name, withAnswers) {
+  document.getElementById('name-screen').style.display = 'none';
+  document.getElementById('view-screen').style.display = 'block';
+  fetch('/english_check/student?name='+encodeURIComponent(name))
+    .then(r => r.json()).then(data => {
+      if (data.error) { document.getElementById('view-content').innerHTML = '<p>Student not found</p>'; return; }
+      renderViewContent(data, withAnswers);
+    });
+}
+
+function renderViewContent(data, withAnswers) {
+  const pct = Math.round(data.score/data.total*100);
+  let html = '<h1 style="margin-bottom:8px">'+data.name+'</h1>';
+  html += '<p class="subtitle">Result: <b>'+data.score+'/'+data.total+'</b> ('+pct+'%)';
+  if (data.finished_at) html += ' &nbsp;·&nbsp; '+new Date(data.finished_at).toLocaleString('en');
+  html += '</p>';
+  QUESTIONS.forEach(q => {
+    const given = data.answers[String(q.id)];
+    const isCorrect = given === q.answer;
+    const statusClass = given ? (isCorrect ? 'ok' : 'fail') : 'skip';
+    const statusText = given ? (isCorrect ? '✓ Correct' : '✗ Wrong') : '— Skipped';
+    html += '<div class="answer-card"><div class="answer-status '+statusClass+'">'+statusText+'</div>'
+      + '<div class="question-num">Q'+q.id+' · '+q.topic+'</div>'
+      + '<div class="question-text" style="margin:6px 0">'+q.text+'</div>';
+    if (given) {
+      const gi = ['A','B','C','D'].indexOf(given);
+      html += '<div class="given-answer">Your answer: <b>'+given+')</b> '+(q.options[gi]||'')+'</div>';
+    }
+    if (withAnswers && !isCorrect) {
+      const ci = ['A','B','C','D'].indexOf(q.answer);
+      html += '<div class="correct-answer">Correct: <b>'+q.answer+')</b> '+(q.options[ci]||'')+'</div>';
+    }
+    html += '</div>';
+  });
+  document.getElementById('view-content').innerHTML = html;
+}
+
+function showTeacherList() {
+  document.getElementById('name-screen').style.display = 'none';
+  document.getElementById('teacher-screen').style.display = 'block';
+  const params = new URLSearchParams(location.search);
+  const sp = params.get('student');
+  if (sp) {
+    document.getElementById('teacher-screen').style.display = 'none';
+    document.getElementById('view-screen').style.display = 'block';
+    fetch('/english_check/student?name='+encodeURIComponent(sp))
+      .then(r => r.json()).then(data => {
+        if (data.error) { document.getElementById('view-content').innerHTML = '<p>Student not found</p>'; return; }
+        renderViewContent(data, true);
+      });
+    return;
+  }
+  fetch('/english_check/list').then(r => r.json()).then(renderTeacherList);
+}
+
+function renderTeacherList(students) {
+  const tkey = new URLSearchParams(location.search).get('teacher');
+  if (!students.length) {
+    document.getElementById('teacher-content').innerHTML = '<h1>Teacher Panel</h1><p style="color:var(--muted);margin-top:16px">No data.</p>';
+    return;
+  }
+  const scores = students.map(s => s.score);
+  const avg = Math.round(scores.reduce((a,b)=>a+b,0)/scores.length);
+  let html = '<h1>Teacher Panel — English B1-B2</h1>'
+    + '<div class="stat-row">'
+    + '<div class="stat-box"><div class="stat-val">'+students.length+'</div><div class="stat-lbl">Students</div></div>'
+    + '<div class="stat-box"><div class="stat-val">'+avg+'</div><div class="stat-lbl">Average</div></div>'
+    + '<div class="stat-box"><div class="stat-val">'+Math.min(...scores)+'–'+Math.max(...scores)+'</div><div class="stat-lbl">Range</div></div>'
+    + '</div>'
+    + '<table><thead><tr><th>Name</th><th>Date</th><th>Score</th><th>Actions</th></tr></thead><tbody>';
+  students.sort((a,b) => b.score - a.score).forEach(s => {
+    const pct = Math.round(s.score/s.total*100);
+    const bc = pct >= 85 ? 'badge-green' : pct >= 60 ? 'badge-yellow' : 'badge-red';
+    const dt = s.finished_at ? new Date(s.finished_at).toLocaleString('en') : '—';
+    html += '<tr><td>'+s.name+'</td><td style="color:var(--muted);font-size:.85rem">'+dt+'</td>'
+      + '<td><span class="badge '+bc+'">'+s.score+'/'+s.total+' ('+pct+'%)</span></td>'
+      + '<td><button class="btn-sm btn-outline" onclick="teacherView(\''+encodeURIComponent(s.name)+'\',\''+tkey+'\',false)">View</button>'
+      + '<button class="btn-sm" onclick="teacherView(\''+encodeURIComponent(s.name)+'\',\''+tkey+'\',true)">With answers</button></td></tr>';
+  });
+  html += '</tbody></table>';
+  document.getElementById('teacher-content').innerHTML = html;
+}
+
+function teacherView(enc, tkey, withAnswers) {
+  const name = decodeURIComponent(enc);
+  document.getElementById('teacher-screen').style.display = 'none';
+  document.getElementById('view-screen').style.display = 'block';
+  const back = '<button class="btn-secondary" style="margin-bottom:16px" onclick="location.href=\'/english_check?teacher='+tkey+'\'">← Back to list</button>';
+  fetch('/english_check/student?name='+encodeURIComponent(name))
+    .then(r => r.json()).then(data => {
+      if (data.error) { document.getElementById('view-content').innerHTML = back+'<p>Student not found</p>'; return; }
+      renderViewContent(data, withAnswers);
+      document.getElementById('view-content').insertAdjacentHTML('afterbegin', back);
+    });
+}
+</script>
+</body>
+</html>
+"""
+
+
+@app.route("/english_check")
+@app.route("/english_check/")
+def english_index():
+    teacher_param = request.args.get("teacher", "")
+    view_param = request.args.get("view", "")
+    is_teacher = (teacher_param == ENGLISH_TEACHER_KEY)
+    safe_q = json.dumps([{k: v for k, v in q.items() if k != "answer"} for q in ENGLISH_QUESTIONS], ensure_ascii=False)
+    full_q = json.dumps(ENGLISH_QUESTIONS, ensure_ascii=False) if is_teacher else safe_q
+    html = ENGLISH_HTML
+    html = html.replace("__QUESTIONS_JSON__", full_q)
+    html = html.replace("__TEACHER_MODE__", "true" if is_teacher else "false")
+    html = html.replace("__VIEW_STUDENT__", json.dumps(view_param) if view_param else "null")
+    html = html.replace("__TEACHER_KEY__", json.dumps(teacher_param))
+    return html
+
+
+@app.route("/english_check/save", methods=["POST"])
+def english_save():
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"ok": False, "error": "no data"}), 400
+    name = str(data.get("name", "")).strip()
+    if not name:
+        return jsonify({"ok": False, "error": "name required"}), 400
+    os.makedirs(ENGLISH_DATA_DIR, exist_ok=True)
+    answers = data.get("answers", {})
+    score = sum(1 for q in ENGLISH_QUESTIONS if answers.get(str(q["id"])) == q["answer"])
+    payload = {
+        "name": name,
+        "started_at": data.get("started_at", ""),
+        "finished_at": data.get("finished_at", ""),
+        "answers": answers,
+        "score": score,
+        "total": len(ENGLISH_QUESTIONS),
+    }
+    path = english_student_path(name)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(payload, f, ensure_ascii=False, indent=2)
+    return jsonify({"ok": True, "score": score})
+
+
+@app.route("/english_check/student")
+def english_student():
+    name = request.args.get("name", "").strip()
+    if not name:
+        return jsonify({"error": "name required"}), 400
+    path = english_student_path(name)
+    if not os.path.exists(path):
+        return jsonify({"error": "not found"}), 404
+    with open(path, "r", encoding="utf-8") as f:
+        return jsonify(json.load(f))
+
+
+@app.route("/english_check/list")
+def english_list():
+    return jsonify(load_all_english_students())
+
+
 if __name__ == "__main__":
     os.makedirs(DATA_DIR, exist_ok=True)
     os.makedirs(MATAN_DATA_DIR, exist_ok=True)
+    os.makedirs(ENGLISH_DATA_DIR, exist_ok=True)
     app.run(host="127.0.0.1", port=5001, debug=False)

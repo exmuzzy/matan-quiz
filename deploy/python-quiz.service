@@ -1,0 +1,15 @@
+[Unit]
+Description=Python Quiz Flask App
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/python-quiz
+ExecStart=/usr/bin/python3 /opt/python-quiz/python_quiz.py
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target

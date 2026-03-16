@@ -2238,8 +2238,8 @@ function renderTeacherList(students) {
     const dt = s.finished_at ? new Date(s.finished_at).toLocaleString('en') : '—';
     html += '<tr><td>'+s.name+'</td><td style="color:var(--muted);font-size:.85rem">'+dt+'</td>'
       + '<td><span class="badge '+bc+'">'+s.score+'/'+s.total+' ('+pct+'%)</span></td>'
-      + '<td><button class="btn-sm btn-outline" onclick="teacherView(&#39;'+encodeURIComponent(s.name)+'&#39;,&#39;''+tkey+'\',false)">View</button>'
-      + '<button class="btn-sm" onclick="teacherView(&#39;'+encodeURIComponent(s.name)+'&#39;,&#39;''+tkey+'\',true)">With answers</button></td></tr>';
+      + '<td><button class="btn-sm btn-outline" onclick="teacherView(&#39;'+encodeURIComponent(s.name)+'&#39;,&#39;'+tkey+'&#39;,false)">View</button>'
+      + '<button class="btn-sm" onclick="teacherView(&#39;'+encodeURIComponent(s.name)+'&#39;,&#39;'+tkey+'&#39;,true)">With answers</button></td></tr>';
   });
   html += '</tbody></table>';
   document.getElementById('teacher-content').innerHTML = html;

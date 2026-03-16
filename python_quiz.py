@@ -1332,6 +1332,8 @@ HTML_PAGE = r"""<!DOCTYPE html>
   .jump-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; }
   .jump-btn { width: 34px; height: 34px; border-radius: 6px; font-size: .78rem; padding: 0;
     background: var(--card); border: 1px solid var(--border); color: var(--muted); }
+  .jump-btn.correct { background:rgba(34,197,94,.3); border-color:var(--green); color:var(--green); }
+  .jump-btn.incorrect { background:rgba(248,81,73,.25); border-color:var(--red); color:var(--red); }
   .jump-btn.answered { background: rgba(59,130,246,.25); border-color: var(--accent); color: var(--text); }
   .jump-btn.current { border-color: var(--accent); color: var(--accent); font-weight: 700; }
 </style>
@@ -2847,10 +2849,18 @@ ENGLISH_HTML = """<!DOCTYPE html>
   .jump-btn { width:32px; height:32px; border-radius:5px; font-size:.72rem; padding:0;
     background:var(--card); border:1px solid var(--border); color:var(--muted); cursor:pointer; }
   .jump-btn:hover { border-color:var(--accent); color:var(--accent); }
+  .jump-btn.correct { background:rgba(34,197,94,.3); border-color:var(--green); color:var(--green); }
+  .jump-btn.incorrect { background:rgba(248,81,73,.25); border-color:var(--red); color:var(--red); }
   .jump-btn.answered { background:rgba(59,130,246,.25); border-color:var(--accent); color:var(--text); }
   .jump-btn.current { border-color:var(--accent); color:var(--accent); font-weight:700; }
   .jump-progress { height:3px; background:var(--border); border-radius:2px; margin-top:3px; overflow:hidden; }
   .jump-progress-fill { height:100%; background:var(--green); border-radius:2px; transition:width .2s; }
+
+  @keyframes blink-correct { 0%,100%{background:rgba(34,197,94,.1)} 50%{background:rgba(34,197,94,.5)} }
+  .option.blink-correct { animation: blink-correct 0.4s ease 3; border-color:var(--green); }
+  .option.blink-correct .option-label { background:var(--green); color:#fff; }
+  .option.show-wrong { border-color:var(--red); opacity:0.7; }
+  .option.show-wrong .option-label { background:var(--red); color:#fff; }
 </style>
 </head>
 <body>
@@ -2869,13 +2879,13 @@ ENGLISH_HTML = """<!DOCTYPE html>
   <p class="subtitle" id="quiz-student-name"></p>
   <p class="progress-text" id="progress-text"></p>
   <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
-  <div class="jump-grid" id="jump-grid"></div>
-  <div id="question-container"></div>
-  <div class="nav-buttons" style="margin-top:12px">
+  <div class="nav-buttons" style="margin-bottom:12px">
     <button class="btn-secondary" onclick="prevQ()">← Back</button>
-    <button class="btn-secondary" onclick="nextQ()">Next →</button>
+    <button class="btn-secondary" id="btn-next" onclick="nextQ()">Next →</button>
     <button class="btn-finish" onclick="finishQuiz()">Finish Quiz</button>
   </div>
+  <div id="question-container"></div>
+  <div class="jump-grid" id="jump-grid"></div>
 </div>
 
 <div id="result-screen" style="display:none">
@@ -2908,6 +2918,9 @@ let currentQ = 0;
 let answers = {};
 let studentName = '';
 let startedAt = '';
+let waitingNext = false;  // true = wrong answer shown, need second Next
+let checkedAnswers = {};  // {qid: true} = answer was checked (for coloring)
+const QUESTIONS_FULL = __FULL_QUESTIONS__;
 
 function updateURL() {
   const qid = QUESTIONS[currentQ].id;
@@ -2990,7 +3003,12 @@ function renderJumpGrid() {
     html += '<div class="jump-group-buttons">';
     g.items.forEach(x => {
       const ans = answers[x.q.id];
-      const cls = x.i === currentQ ? 'jump-btn current' : ans ? 'jump-btn answered' : 'jump-btn';
+      let cls = 'jump-btn';
+      if (x.i === currentQ) cls += ' current';
+      if (ans) {
+        const isCorrect = QUESTIONS_FULL && QUESTIONS_FULL[x.i] && QUESTIONS_FULL[x.i].answer === ans;
+        cls += (checkedAnswers[x.q.id]) ? (isCorrect ? ' correct' : ' incorrect') : ' answered';
+      }
       html += '<button class="' + cls + '" onclick="goToQ(' + x.i + ')">' + x.q.id + '</button>';
     });
     html += '</div></div>';
@@ -3008,6 +3026,9 @@ function toggleGroup(gi) {
 function goToQ(i) { currentQ = i; renderQuestion(); renderJumpGrid(); updateURL(); }
 
 function renderQuestion() {
+  waitingNext = false;
+  var btnNext = document.getElementById('btn-next');
+  if (btnNext) btnNext.textContent = 'Next \u2192';
   const q = QUESTIONS[currentQ];
   const total = QUESTIONS.length;
   document.getElementById('progress-text').textContent =
@@ -3036,7 +3057,42 @@ function selectAnswer(qid, label, el) {
 }
 
 function prevQ() { if (currentQ > 0) { currentQ--; renderQuestion(); renderJumpGrid(); updateURL(); } }
-function nextQ() { if (currentQ < QUESTIONS.length-1) { currentQ++; renderQuestion(); renderJumpGrid(); updateURL(); } }
+function nextQ() {
+  if (currentQ >= QUESTIONS.length-1) return;
+  // If waiting for second Next (after showing correct answer), just proceed
+  if (waitingNext) {
+    waitingNext = false;
+    currentQ++;
+    renderQuestion();
+    renderJumpGrid();
+    updateURL();
+    return;
+  }
+  // If current question is answered, check it
+  const q = QUESTIONS[currentQ];
+  const given = answers[q.id];
+  if (given && QUESTIONS_FULL) {
+    const fullQ = QUESTIONS_FULL[currentQ];
+    checkedAnswers[q.id] = true;
+    if (fullQ && given !== fullQ.answer) {
+      // Wrong answer — show correct with blink
+      const correctIdx = ['A','B','C','D'].indexOf(fullQ.answer);
+      const givenIdx = ['A','B','C','D'].indexOf(given);
+      const options = document.querySelectorAll('.option');
+      if (options[givenIdx]) options[givenIdx].classList.add('show-wrong');
+      if (options[correctIdx]) options[correctIdx].classList.add('blink-correct');
+      waitingNext = true;
+      document.getElementById('btn-next').textContent = 'Next → →';
+      renderJumpGrid();
+      return;
+    }
+  }
+  // Correct or unanswered — proceed
+  currentQ++;
+  renderQuestion();
+  renderJumpGrid();
+  updateURL();
+}
 
 function finishQuiz() {
   const unanswered = QUESTIONS.length - Object.keys(answers).length;
@@ -3182,6 +3238,7 @@ def english_index():
     full_q = json.dumps(ENGLISH_QUESTIONS, ensure_ascii=False) if is_teacher else safe_q
     html = ENGLISH_HTML
     html = html.replace("__QUESTIONS_JSON__", full_q)
+    html = html.replace("__FULL_QUESTIONS__", json.dumps(ENGLISH_QUESTIONS, ensure_ascii=False))
     html = html.replace("__TEACHER_MODE__", "true" if is_teacher else "false")
     html = html.replace("__VIEW_STUDENT__", json.dumps(view_param) if view_param else "null")
     html = html.replace("__TEACHER_KEY__", json.dumps(teacher_param))

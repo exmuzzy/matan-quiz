@@ -2909,9 +2909,25 @@ let answers = {};
 let studentName = '';
 let startedAt = '';
 
+function updateURL() {
+  const qid = QUESTIONS[currentQ].id;
+  history.replaceState(null, '', '#q=' + qid);
+}
+
 window.onload = function() {
   if (TEACHER_MODE) { showTeacherList(); return; }
   if (VIEW_STUDENT) { showViewScreen(VIEW_STUDENT, false); return; }
+  // Check if we can auto-restore session from localStorage + URL hash
+  const hash = location.hash;
+  let savedName = null;
+  try { savedName = localStorage.getItem('eng_quiz_name'); } catch(e) {}
+  if (savedName && hash && hash.match(/^#q=\d+$/)) {
+    // Auto-restore: fill in name and start
+    document.getElementById('student-name').value = savedName;
+    document.getElementById('name-screen').style.display = 'block';
+    startQuiz();
+    return;
+  }
   document.getElementById('name-screen').style.display = 'block';
   document.getElementById('student-name').addEventListener('keydown', e => {
     if (e.key === 'Enter') startQuiz();
@@ -2923,11 +2939,26 @@ function startQuiz() {
   if (!n) { alert('Please enter your name!'); return; }
   studentName = n;
   startedAt = new Date().toISOString();
+  // Save name to localStorage for session restore
+  try { localStorage.setItem('eng_quiz_name', n); localStorage.setItem('eng_quiz_started', startedAt); } catch(e) {}
   document.getElementById('name-screen').style.display = 'none';
   document.getElementById('quiz-screen').style.display = 'block';
   document.getElementById('quiz-student-name').textContent = n;
+  // Restore question from URL hash
+  const hash = location.hash;
+  if (hash && hash.match(/^#q=(\d+)$/)) {
+    const qnum = parseInt(hash.substring(3));
+    const idx = QUESTIONS.findIndex(q => q.id === qnum);
+    if (idx >= 0) currentQ = idx;
+  }
+  // Restore answers from localStorage
+  try {
+    const saved = localStorage.getItem('eng_quiz_answers');
+    if (saved) { const parsed = JSON.parse(saved); if (typeof parsed === 'object') Object.assign(answers, parsed); }
+  } catch(e) {}
   renderJumpGrid();
   renderQuestion();
+  updateURL();
 }
 
 function renderJumpGrid() {
@@ -2974,7 +3005,7 @@ function toggleGroup(gi) {
   arrow.classList.toggle('open');
 }
 
-function goToQ(i) { currentQ = i; renderQuestion(); renderJumpGrid(); }
+function goToQ(i) { currentQ = i; renderQuestion(); renderJumpGrid(); updateURL(); }
 
 function renderQuestion() {
   const q = QUESTIONS[currentQ];
@@ -3000,10 +3031,12 @@ function selectAnswer(qid, label, el) {
   document.getElementById('progress-text').textContent =
     'Question '+(currentQ+1)+' of '+QUESTIONS.length+'  ·  Answered: '+Object.keys(answers).length;
   renderJumpGrid();
+  // Save answers to localStorage
+  try { localStorage.setItem('eng_quiz_answers', JSON.stringify(answers)); } catch(e) {}
 }
 
-function prevQ() { if (currentQ > 0) { currentQ--; renderQuestion(); renderJumpGrid(); } }
-function nextQ() { if (currentQ < QUESTIONS.length-1) { currentQ++; renderQuestion(); renderJumpGrid(); } }
+function prevQ() { if (currentQ > 0) { currentQ--; renderQuestion(); renderJumpGrid(); updateURL(); } }
+function nextQ() { if (currentQ < QUESTIONS.length-1) { currentQ++; renderQuestion(); renderJumpGrid(); updateURL(); } }
 
 function finishQuiz() {
   const unanswered = QUESTIONS.length - Object.keys(answers).length;
@@ -3022,6 +3055,7 @@ function finishQuiz() {
   }).then(r => r.json()).then(d => {
     if (d.ok) {
       document.getElementById('quiz-screen').style.display = 'none';
+      try { localStorage.removeItem('eng_quiz_answers'); localStorage.removeItem('eng_quiz_name'); localStorage.removeItem('eng_quiz_started'); } catch(e) {}
       document.getElementById('result-screen').style.display = 'block';
       document.getElementById('result-score').textContent = d.score;
       const pct = Math.round(d.score/QUESTIONS.length*100);

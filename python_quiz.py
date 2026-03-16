@@ -11,6 +11,7 @@ app = Flask(__name__)
 
 DATA_DIR = "/var/www/quiz_data"
 MATAN_DATA_DIR = "/var/www/matan_data"
+MATAN_QUIZ_DIR = "/var/www/matan_quiz_data"
 TEACHER_KEY = "xR7kP2mQw9"
 REPORT_KEY = "jN4vL8tH1s"
 
@@ -2727,6 +2728,7 @@ def matan_save():
     if not name:
         return jsonify({"ok": False, "error": "name required"}), 400
     os.makedirs(MATAN_DATA_DIR, exist_ok=True)
+    os.makedirs(MATAN_QUIZ_DIR, exist_ok=True)
     os.makedirs(ENGLISH_DATA_DIR, exist_ok=True)
     path = matan_path(name)
 
@@ -3285,6 +3287,64 @@ def english_student():
 @app.route("/english_check/list")
 def english_list():
     return jsonify(load_all_english_students())
+
+
+
+
+# ─── Matan Quiz Routes ──────────────────────────────────────────────────────
+
+MATAN_QUIZ_QUESTIONS_PATH = "/var/www/matan_data/matan_quiz_questions.json"
+
+@app.route("/matan_quiz/questions")
+def matan_quiz_questions():
+    if not os.path.exists(MATAN_QUIZ_QUESTIONS_PATH):
+        return jsonify({"sections": [], "questions": []})
+    try:
+        with open(MATAN_QUIZ_QUESTIONS_PATH, "r", encoding="utf-8") as f:
+            return jsonify(json.load(f))
+    except Exception:
+        return jsonify({"sections": [], "questions": []})
+
+
+@app.route("/matan_quiz/save", methods=["POST"])
+def matan_quiz_save():
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"ok": False, "error": "no data"}), 400
+    name = str(data.get("name", "")).strip()
+    if not name:
+        return jsonify({"ok": False, "error": "name required"}), 400
+    os.makedirs(MATAN_QUIZ_DIR, exist_ok=True)
+    path = os.path.join(MATAN_QUIZ_DIR, safe_filename(name) + ".json")
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    return jsonify({"ok": True})
+
+
+@app.route("/matan_quiz/student")
+def matan_quiz_student():
+    name = request.args.get("name", "").strip()
+    if not name:
+        return jsonify({"error": "name required"}), 400
+    path = os.path.join(MATAN_QUIZ_DIR, safe_filename(name) + ".json")
+    if not os.path.exists(path):
+        return jsonify({"error": "not found"}), 404
+    with open(path, "r", encoding="utf-8") as f:
+        return jsonify(json.load(f))
+
+
+@app.route("/matan_quiz/list")
+def matan_quiz_list():
+    students = []
+    if os.path.isdir(MATAN_QUIZ_DIR):
+        for fname in os.listdir(MATAN_QUIZ_DIR):
+            if fname.endswith(".json"):
+                try:
+                    with open(os.path.join(MATAN_QUIZ_DIR, fname), "r", encoding="utf-8") as f:
+                        students.append(json.load(f))
+                except Exception:
+                    pass
+    return jsonify(students)
 
 
 if __name__ == "__main__":

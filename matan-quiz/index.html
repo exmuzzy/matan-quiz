@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Матанализ — Опрос</title>
+<style>
+:root{--bg:#0f1419;--card:#1a2332;--border:#2d3a4f;--accent:#58a6ff;--accent-dim:rgba(88,166,255,.15);--green:#3fb950;--red:#f85149;--text:#e6edf3;--muted:#8b949e}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;line-height:1.5}
+.page{display:flex;gap:24px;align-items:flex-start;max-width:1400px;margin:0 auto;padding:24px 20px}
+.main{flex:0 0 680px;min-width:0}
+.theory-col{flex:1;min-width:280px;position:sticky;top:20px;display:none}
+.theory-col.visible{display:block}
+.theory-inner{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.theory-header{display:flex;align-items:flex-start;gap:10px;padding:14px 16px;border-bottom:1px solid var(--border);background:rgba(88,166,255,.07)}
+.theory-title{flex:1;font-size:.92rem;font-weight:600;color:var(--accent);line-height:1.4}
+.theory-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;padding:0 2px}
+.theory-close:hover{color:var(--text)}
+.theory-body{padding:16px;font-size:.88rem;line-height:1.7}
+.theory-body p{margin-bottom:10px}
+.theory-body p:last-child{margin-bottom:0}
+.theory-status{color:var(--muted);font-style:italic;font-size:.85rem}
+
+h1{font-size:1.4rem;font-weight:600;margin-bottom:4px}
+.subtitle{color:var(--muted);font-size:.88rem;margin-bottom:20px}
+input[type=text]{width:100%;padding:12px 16px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:1rem;margin-bottom:14px;outline:none}
+input:focus{border-color:var(--accent)}
+button{padding:10px 20px;border-radius:8px;border:none;font-size:.92rem;cursor:pointer;font-weight:600;transition:opacity .15s}
+button:hover{opacity:.85}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-secondary{background:var(--card);border:1px solid var(--border);color:var(--text)}
+.btn-secondary:hover{border-color:var(--accent)}
+.btn-finish{background:var(--green);color:#fff}
+.btn-theory{background:none;border:1px solid var(--border);color:var(--muted);padding:4px 10px;font-size:.78rem;border-radius:5px;cursor:pointer;margin-left:auto;flex-shrink:0}
+.btn-theory:hover{border-color:var(--accent);color:var(--accent)}
+.btn-theory.active{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+
+.progress-text{color:var(--muted);font-size:.82rem;margin-bottom:6px}
+.progress-bar{height:4px;background:var(--border);border-radius:2px;margin-bottom:14px}
+.progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .2s}
+
+.nav-buttons{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+
+/* Section groups */
+.section-group{margin-bottom:16px}
+.section-title{font-size:.88rem;font-weight:600;color:var(--accent);padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px 8px 0 0;cursor:pointer;display:flex;align-items:center;gap:8px}
+.section-arrow{font-size:.7rem;color:var(--muted);transition:transform .15s}
+.section-arrow.open{transform:rotate(90deg)}
+.section-stats{font-size:.72rem;color:var(--muted);margin-left:auto}
+.section-items{border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px;overflow:hidden}
+.section-group.collapsed .section-items{display:none}
+
+/* Topic item in sidebar */
+.topic-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--border);cursor:pointer;font-size:.82rem;transition:background .15s}
+.topic-item:last-child{border-bottom:none}
+.topic-item:hover{background:var(--accent-dim)}
+.topic-item.current{background:var(--accent-dim);border-left:3px solid var(--accent)}
+.topic-item.answered{color:var(--green)}
+.topic-item.skipped{color:var(--muted)}
+.topic-num{color:var(--muted);font-size:.72rem;min-width:24px}
+
+/* Question card */
+.q-card{background:var(--card);border-radius:10px;padding:20px;margin-bottom:14px}
+.q-topic{font-size:.78rem;color:var(--muted);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.q-text{font-size:1rem;margin-bottom:14px;line-height:1.6}
+.q-options{display:flex;flex-direction:column;gap:6px}
+.q-opt{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;border:1px solid var(--border);cursor:pointer;transition:background .15s,border-color .15s;font-size:.9rem}
+.q-opt:hover{background:var(--accent-dim);border-color:var(--accent)}
+.q-opt.selected{background:var(--accent-dim);border-color:var(--accent)}
+.q-opt-label{width:26px;height:26px;border-radius:6px;background:var(--border);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:.82rem;flex-shrink:0}
+.q-opt.selected .q-opt-label{background:var(--accent);color:#fff}
+.q-no-questions{color:var(--muted);font-style:italic;padding:16px 0;font-size:.88rem}
+
+.result-card{background:var(--card);border-radius:12px;padding:32px;text-align:center;margin-bottom:20px}
+.score-big{font-size:2.5rem;font-weight:700;margin:12px 0}
+.score-label{color:var(--muted);font-size:.9rem}
+
+/* Teacher */
+table{width:100%;border-collapse:collapse;margin-top:16px}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--border)}
+th{color:var(--muted);font-size:.82rem}
+.badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:.78rem;font-weight:600}
+.badge-green{background:rgba(34,197,94,.2);color:var(--green)}
+.badge-yellow{background:rgba(234,179,8,.2);color:#eab308}
+.badge-red{background:rgba(239,68,68,.2);color:var(--red)}
+.btn-sm{padding:5px 12px;font-size:.78rem}
+.btn-outline{background:transparent;border:1px solid var(--accent);color:var(--accent)}
+.stat-row{display:flex;gap:20px;flex-wrap:wrap;margin:14px 0}
+.stat-box{background:var(--card);border-radius:10px;padding:14px 20px;flex:1;min-width:120px}
+.stat-val{font-size:1.6rem;font-weight:700}
+.stat-lbl{color:var(--muted);font-size:.78rem}
+
+@media(max-width:960px){.page{flex-direction:column}.main{flex:none;width:100%}.theory-col{position:static;width:100%}}
+</style>
+</head>
+<body>
+<div class="page">
+<div class="main">
+
+<!-- Name screen -->
+<div id="name-screen">
+  <h1>📐 Матанализ — Опрос</h1>
+  <p class="subtitle">Опрос по выбранным темам · Проверь свои знания</p>
+  <input type="text" id="student-name" placeholder="Введи имя и фамилию" maxlength="60">
+  <br>
+  <button class="btn-primary" onclick="startQuiz()">Начать опрос</button>
+  <p style="color:var(--muted);font-size:.78rem;margin-top:10px">Вопросы формируются по темам, отмеченным в <a href="/matan_topics/" style="color:var(--accent)">списке тем</a>.</p>
+</div>
+
+<!-- Quiz screen -->
+<div id="quiz-screen" style="display:none">
+  <h1>📐 Матанализ — Опрос</h1>
+  <p class="subtitle" id="quiz-student-name"></p>
+  <p class="progress-text" id="progress-text"></p>
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+  <div class="nav-buttons">
+    <button class="btn-secondary" onclick="prevQ()">← Назад</button>
+    <button class="btn-secondary" onclick="nextQ()">Далее →</button>
+    <button class="btn-finish" onclick="finishQuiz()">Завершить</button>
+  </div>
+  <div id="question-container"></div>
+  <div id="topic-nav"></div>
+</div>
+
+<!-- Result screen -->
+<div id="result-screen" style="display:none">
+  <div class="result-card">
+    <h1>Опрос завершён</h1>
+    <div class="score-big" id="result-count"></div>
+    <div class="score-label">вопросов отвечено</div>
+    <p style="margin-top:12px;color:var(--muted)">Результаты отправлены преподавателю.</p>
+  </div>
+  <button class="btn-secondary" onclick="location.href='/matan_topics/'">← К списку тем</button>
+</div>
+
+<!-- Teacher screen -->
+<div id="teacher-screen" style="display:none">
+  <div id="teacher-content"></div>
+</div>
+
+<!-- View student screen -->
+<div id="view-screen" style="display:none">
+  <div id="view-content"></div>
+</div>
+
+</div>
+
+<!-- Theory panel -->
+<div class="theory-col" id="theory-col">
+  <div class="theory-inner">
+    <div class="theory-header">
+      <h3 class="theory-title" id="theory-title"></h3>
+      <button class="theory-close" onclick="hideTheory()">✕</button>
+    </div>
+    <div class="theory-body" id="theory-body"></div>
+  </div>
+</div>
+</div>
+
+<script>
+const API = '';
+const TEACHER_KEY = 'mQz8kR3pL1';
+const params = new URLSearchParams(location.search);
+const isTeacher = params.get('teacher') === TEACHER_KEY;
+const viewStudent = params.get('view');
+
+let allQuestions = [];  // [{idx, topic, questions: [{text, options, answer}]}]
+let flatQuestions = []; // [{idx, topic, text, options, qIndex}] — flattened for navigation
+let currentQ = 0;
+let answers = {};       // {flatIndex: 'A'|'B'|'C'|'D'}
+let studentName = '';
+let startedAt = '';
+let selectedTopics = [];
+let theoryCache = {};
+let activeTheoryIdx = null;
+
+// ── SECTIONS (same as matan_topics) ──
+const SECTIONS = null; // Will be loaded from questions
+
+window.onload = function() {
+  if (isTeacher) { loadTeacher(); return; }
+  if (viewStudent) { loadStudentView(viewStudent); return; }
+  document.getElementById('name-screen').style.display = 'block';
+  document.getElementById('student-name').addEventListener('keydown', e => {
+    if (e.key === 'Enter') startQuiz();
+  });
+  // Try restore
+  try {
+    const saved = localStorage.getItem('matan_quiz_name');
+    if (saved) document.getElementById('student-name').value = saved;
+  } catch(e) {}
+};
+
+async function startQuiz() {
+  const n = document.getElementById('student-name').value.trim();
+  if (!n) { alert('Введи имя!'); return; }
+  studentName = n;
+  startedAt = new Date().toISOString();
+  try { localStorage.setItem('matan_quiz_name', n); } catch(e) {}
+
+  // Load selected topics
+  document.getElementById('name-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  document.getElementById('quiz-student-name').textContent = n;
+  document.getElementById('question-container').innerHTML = '<p style="color:var(--muted)">Загрузка вопросов…</p>';
+
+  try {
+    // Load user selections
+    const selRes = await fetch(API + '/matan_topics/load?name=matan');
+    const selData = await selRes.json();
+    // Load questions
+    const qRes = await fetch(API + '/matan_quiz/questions');
+    const qData = await qRes.json();
+
+    // Build selected topic indices
+    let selectedIndices = new Set();
+    if (selData.sections) {
+      let gi = 0;
+      // We need section info to map local→global indices
+      // qData has section structure
+      if (qData.sections) {
+        qData.sections.forEach(sec => {
+          const localSel = selData.sections[sec.title] || [];
+          localSel.forEach(li => selectedIndices.add(gi + li));
+          gi += sec.count;
+        });
+      }
+    }
+
+    if (selectedIndices.size === 0) {
+      document.getElementById('question-container').innerHTML =
+        '<p style="color:var(--muted)">Нет выбранных тем. <a href="/matan_topics/" style="color:var(--accent)">Отметьте темы</a> в списке.</p>';
+      return;
+    }
+
+    // Build quiz from questions
+    allQuestions = [];
+    flatQuestions = [];
+    qData.questions.forEach(tq => {
+      if (selectedIndices.has(tq.idx) && tq.items && tq.items.length > 0) {
+        allQuestions.push(tq);
+        tq.items.forEach((item, qi) => {
+          flatQuestions.push({idx: tq.idx, topic: tq.topic, text: item.text, options: item.options, qIndex: qi, _answer: item.answer});
+        });
+      }
+    });
+
+    if (flatQuestions.length === 0) {
+      document.getElementById('question-container').innerHTML =
+        '<p style="color:var(--muted)">Для выбранных тем пока нет вопросов.</p>';
+      return;
+    }
+
+    // Restore answers
+    try {
+      const saved = localStorage.getItem('matan_quiz_answers');
+      if (saved) Object.assign(answers, JSON.parse(saved));
+    } catch(e) {}
+
+    // Restore position from hash
+    const hash = location.hash;
+    if (hash && hash.match(/^#q=\d+$/)) {
+      const qi = parseInt(hash.substring(3));
+      if (qi >= 0 && qi < flatQuestions.length) currentQ = qi;
+    }
+
+    renderQuestion();
+    renderTopicNav();
+  } catch(err) {
+    document.getElementById('question-container').innerHTML =
+      '<p style="color:var(--red)">Ошибка загрузки: ' + err.message + '</p>';
+  }
+}
+
+function renderQuestion() {
+  if (flatQuestions.length === 0) return;
+  const fq = flatQuestions[currentQ];
+  const total = flatQuestions.length;
+  const answered = Object.keys(answers).length;
+
+  document.getElementById('progress-text').textContent =
+    'Вопрос ' + (currentQ+1) + ' из ' + total + '  ·  Отвечено: ' + answered;
+  document.getElementById('progress-fill').style.width = ((currentQ+1)/total*100) + '%';
+
+  let html = '<div class="q-card">';
+  html += '<div class="q-topic"><span>' + fq.topic + '</span>';
+  html += '<button class="btn-theory' + (activeTheoryIdx === fq.idx ? ' active' : '') + '" onclick="toggleTheory(' + fq.idx + ',\'' + fq.topic.replace(/'/g, "\\'") + '\')">📖 Теория</button>';
+  html += '</div>';
+  html += '<div class="q-text">' + fq.text + '</div>';
+  html += '<div class="q-options">';
+  fq.options.forEach((opt, i) => {
+    const label = ['A','B','C','D'][i];
+    const sel = answers[currentQ] === label ? ' selected' : '';
+    html += '<div class="q-opt' + sel + '" onclick="selectAnswer(' + currentQ + ',\'' + label + '\',this)">';
+    html += '<span class="q-opt-label">' + label + '</span><span>' + opt + '</span></div>';
+  });
+  html += '</div></div>';
+  document.getElementById('question-container').innerHTML = html;
+  history.replaceState(null, '', '#q=' + currentQ);
+}
+
+function selectAnswer(qi, label, el) {
+  answers[qi] = label;
+  document.querySelectorAll('.q-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('progress-text').textContent =
+    'Вопрос ' + (currentQ+1) + ' из ' + flatQuestions.length + '  ·  Отвечено: ' + Object.keys(answers).length;
+  renderTopicNav();
+  try { localStorage.setItem('matan_quiz_answers', JSON.stringify(answers)); } catch(e) {}
+}
+
+function prevQ() { if (currentQ > 0) { currentQ--; renderQuestion(); renderTopicNav(); } }
+function nextQ() { if (currentQ < flatQuestions.length-1) { currentQ++; renderQuestion(); renderTopicNav(); } }
+function goToQ(i) { currentQ = i; renderQuestion(); renderTopicNav(); }
+
+function renderTopicNav() {
+  // Group flatQuestions by section
+  const nav = document.getElementById('topic-nav');
+  let html = '';
+  let lastTopic = '';
+  let groupStart = -1;
+  const groups = [];
+  flatQuestions.forEach((fq, i) => {
+    if (fq.topic !== lastTopic) {
+      groups.push({topic: fq.topic, idx: fq.idx, start: i, items: []});
+      lastTopic = fq.topic;
+    }
+    groups[groups.length-1].items.push(i);
+  });
+
+  groups.forEach((g, gi) => {
+    const answeredCount = g.items.filter(i => answers[i]).length;
+    const hasCurrent = g.items.includes(currentQ);
+    const collapsed = !hasCurrent && answeredCount === g.items.length ? ' collapsed' : '';
+    html += '<div class="section-group' + collapsed + '" id="sg-' + gi + '">';
+    html += '<div class="section-title" onclick="toggleSection(' + gi + ')">';
+    html += '<span class="section-arrow' + (collapsed ? '' : ' open') + '" id="sa-' + gi + '">&#9654;</span>';
+    html += g.topic;
+    html += '<span class="section-stats">' + answeredCount + '/' + g.items.length + '</span>';
+    html += '</div><div class="section-items">';
+    g.items.forEach(i => {
+      const cls = i === currentQ ? 'topic-item current' : answers[i] ? 'topic-item answered' : 'topic-item';
+      html += '<div class="' + cls + '" onclick="goToQ(' + i + ')">';
+      html += '<span class="topic-num">' + (i+1) + '</span>';
+      html += flatQuestions[i].text.substring(0, 60) + (flatQuestions[i].text.length > 60 ? '…' : '');
+      html += '</div>';
+    });
+    html += '</div></div>';
+  });
+  nav.innerHTML = html;
+}
+
+function toggleSection(gi) {
+  document.getElementById('sg-' + gi).classList.toggle('collapsed');
+  document.getElementById('sa-' + gi).classList.toggle('open');
+}
+
+// ── Theory ──
+function toggleTheory(idx, topicName) {
+  if (activeTheoryIdx === idx) { hideTheory(); return; }
+  activeTheoryIdx = idx;
+  const col = document.getElementById('theory-col');
+  const title = document.getElementById('theory-title');
+  const body = document.getElementById('theory-body');
+  title.textContent = topicName;
+  col.classList.add('visible');
+
+  if (theoryCache[idx]) { body.innerHTML = theoryCache[idx]; renderQuestion(); return; }
+  body.innerHTML = '<span class="theory-status">Загрузка…</span>';
+  renderQuestion();
+
+  fetch(API + '/matan_topics/theory?idx=' + idx)
+    .then(r => r.json())
+    .then(data => {
+      const ps = (data.paragraphs || []).slice(0, 6);
+      const html = ps.length ? ps.map(p => '<p>' + p + '</p>').join('') : '<span class="theory-status">Теория ещё не добавлена</span>';
+      theoryCache[idx] = html;
+      if (activeTheoryIdx === idx) body.innerHTML = html;
+    })
+    .catch(() => { body.innerHTML = '<span class="theory-status">Ошибка загрузки</span>'; });
+}
+
+function hideTheory() {
+  activeTheoryIdx = null;
+  document.getElementById('theory-col').classList.remove('visible');
+  renderQuestion();
+}
+
+// ── Finish ──
+function finishQuiz() {
+  const unanswered = flatQuestions.length - Object.keys(answers).length;
+  if (unanswered > 0 && !confirm('Не отвечено: ' + unanswered + '. Завершить?')) return;
+
+  const payload = {
+    name: studentName,
+    started_at: startedAt,
+    finished_at: new Date().toISOString(),
+    answers: {},
+    total: flatQuestions.length
+  };
+  // Save answers keyed by topic index + question index
+  flatQuestions.forEach((fq, i) => {
+    if (answers[i]) {
+      payload.answers[fq.idx + '_' + fq.qIndex] = {given: answers[i], correct: fq._answer};
+    }
+  });
+  payload.score = Object.values(payload.answers).filter(a => a.given === a.correct).length;
+
+  fetch(API + '/matan_quiz/save', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(payload)
+  }).then(r => r.json()).then(d => {
+    if (d.ok) {
+      document.getElementById('quiz-screen').style.display = 'none';
+      document.getElementById('result-screen').style.display = 'block';
+      document.getElementById('result-count').textContent = Object.keys(answers).length + ' / ' + flatQuestions.length;
+      try { localStorage.removeItem('matan_quiz_answers'); } catch(e) {}
+    }
+  }).catch(() => alert('Ошибка сети'));
+}
+
+// ── Teacher ──
+function loadTeacher() {
+  document.getElementById('name-screen').style.display = 'none';
+  document.getElementById('teacher-screen').style.display = 'block';
+  fetch(API + '/matan_quiz/list').then(r => r.json()).then(students => {
+    if (!students.length) {
+      document.getElementById('teacher-content').innerHTML = '<h1>Преподаватель</h1><p style="color:var(--muted);margin-top:16px">Нет данных.</p>';
+      return;
+    }
+    const scores = students.map(s => s.score || 0);
+    const avg = Math.round(scores.reduce((a,b) => a+b, 0) / scores.length);
+    let html = '<h1>Панель преподавателя — Матанализ</h1>';
+    html += '<div class="stat-row">';
+    html += '<div class="stat-box"><div class="stat-val">' + students.length + '</div><div class="stat-lbl">Учеников</div></div>';
+    html += '<div class="stat-box"><div class="stat-val">' + avg + '%</div><div class="stat-lbl">Средний %</div></div>';
+    html += '</div>';
+    html += '<table><thead><tr><th>Имя</th><th>Дата</th><th>Баллы</th><th></th></tr></thead><tbody>';
+    students.sort((a,b) => (b.score||0) - (a.score||0)).forEach(s => {
+      const pct = s.total ? Math.round(s.score / s.total * 100) : 0;
+      const bc = pct >= 80 ? 'badge-green' : pct >= 50 ? 'badge-yellow' : 'badge-red';
+      const dt = s.finished_at ? new Date(s.finished_at).toLocaleString('ru') : '—';
+      html += '<tr><td>' + s.name + '</td><td style="color:var(--muted);font-size:.82rem">' + dt + '</td>';
+      html += '<td><span class="badge ' + bc + '">' + (s.score||0) + '/' + (s.total||0) + ' (' + pct + '%)</span></td>';
+      html += '<td><button class="btn-sm btn-outline" onclick="loadStudentView(\'' + encodeURIComponent(s.name) + '\')">Подробнее</button></td></tr>';
+    });
+    html += '</tbody></table>';
+    document.getElementById('teacher-content').innerHTML = html;
+  });
+}
+
+function loadStudentView(name) {
+  document.getElementById('name-screen').style.display = 'none';
+  document.getElementById('teacher-screen').style.display = 'none';
+  document.getElementById('view-screen').style.display = 'block';
+  fetch(API + '/matan_quiz/student?name=' + encodeURIComponent(name))
+    .then(r => r.json())
+    .then(data => {
+      if (data.error) { document.getElementById('view-content').innerHTML = '<p>Не найден</p>'; return; }
+      const pct = data.total ? Math.round(data.score / data.total * 100) : 0;
+      let html = '<button class="btn-secondary" style="margin-bottom:14px" onclick="location.href=\'/matan_quiz/?teacher=' + TEACHER_KEY + '\'">← Назад</button>';
+      html += '<h1>' + data.name + '</h1>';
+      html += '<p class="subtitle">Результат: <b>' + data.score + '/' + data.total + '</b> (' + pct + '%)</p>';
+      // Show answers grouped by topic
+      const ans = data.answers || {};
+      const keys = Object.keys(ans).sort((a,b) => {
+        const [ai,aq] = a.split('_').map(Number);
+        const [bi,bq] = b.split('_').map(Number);
+        return ai - bi || aq - bq;
+      });
+      keys.forEach(k => {
+        const a = ans[k];
+        const isCorrect = a.given === a.correct;
+        html += '<div style="padding:8px 12px;margin-bottom:4px;background:var(--card);border-radius:6px;border-left:3px solid ' + (isCorrect ? 'var(--green)' : 'var(--red)') + '">';
+        html += '<span style="font-size:.78rem;color:var(--muted)">Тема ' + k.split('_')[0] + ', вопрос ' + (parseInt(k.split('_')[1])+1) + '</span> ';
+        html += isCorrect ? '<span style="color:var(--green)">✓</span>' : '<span style="color:var(--red)">✗ (ответ: ' + a.given + ', верно: ' + a.correct + ')</span>';
+        html += '</div>';
+      });
+      document.getElementById('view-content').innerHTML = html;
+    });
+}
+</script>
+</body>
+</html>

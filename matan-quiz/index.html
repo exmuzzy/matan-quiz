@@ -207,9 +207,9 @@ async function startQuiz() {
 
   try {
     // Load user selections
-    document.title='STEP1'; const selRes = await fetch('/matan_topics/load?name=matan');
+    const selRes = await fetch('/matan_topics/load?name=matan');
     const selData = await selRes.json();
-    document.title='STEP2'; const qRes = await fetch('/matan_quiz/questions');
+    const qRes = await fetch('/matan_quiz/questions');
     const qData = await qRes.json();
 
     // Build selected topic indices
@@ -227,8 +227,7 @@ async function startQuiz() {
       }
     }
 
-    console.log('Selected indices:', selectedIndices.size);
-    if (selectedIndices.size === 0) {
+        if (selectedIndices.size === 0) {
       document.getElementById('question-container').innerHTML =
         '<p style="color:var(--muted)">Нет выбранных тем. <a href="/matan_topics/" style="color:var(--accent)">Отметьте темы</a> в списке.</p>';
       return;
@@ -246,8 +245,7 @@ async function startQuiz() {
       }
     });
 
-    console.log('flatQuestions:', flatQuestions.length);
-    if (flatQuestions.length === 0) {
+        if (flatQuestions.length === 0) {
       document.getElementById('question-container').innerHTML =
         '<p style="color:var(--muted)">Для выбранных тем пока нет вопросов.</p>';
       return;
@@ -266,12 +264,11 @@ async function startQuiz() {
       if (qi >= 0 && qi < flatQuestions.length) currentQ = qi;
     }
 
-    document.title='STEP3'; console.log('Calling renderQuestion, currentQ:', currentQ, 'flatQ:', flatQuestions.length);
-    renderQuestion();
+        renderQuestion();
     renderTopicNav();
   } catch(err) {
     document.getElementById('question-container').innerHTML =
-      '<p style="color:var(--red)">Ошибка: ' + err.message + '<br>' + String(err.stack).replace(/</g,'&lt;') + '</p>';
+      '<p style="color:var(--red)">Ошибка: ' + err.message + '<br>' + err.message + '</p>';
   }
 }
 

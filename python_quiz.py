@@ -2874,11 +2874,23 @@ ENGLISH_HTML = """<!DOCTYPE html>
   .answer-status.skip { color:var(--muted); }
   .given-answer { margin-top:6px; font-size:.9rem; }
   .correct-answer { margin-top:4px; font-size:.9rem; color:var(--green); }
-  .jump-grid { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:20px; }
-  .jump-btn { width:34px; height:34px; border-radius:6px; font-size:.78rem; padding:0;
-    background:var(--card); border:1px solid var(--border); color:var(--muted); }
+  .jump-grid { margin-bottom:20px; }
+  .jump-group { margin-bottom:12px; }
+  .jump-group-header { display:flex; align-items:center; gap:8px; cursor:pointer; padding:6px 0; user-select:none; }
+  .jump-group-title { font-size:.82rem; font-weight:600; color:var(--accent); }
+  .jump-group-stats { font-size:.75rem; color:var(--muted); }
+  .jump-group-arrow { font-size:.7rem; color:var(--muted); transition:transform .15s; }
+  .jump-group-arrow.open { transform:rotate(90deg); }
+  .jump-group-buttons { display:flex; flex-wrap:wrap; gap:4px; padding:4px 0 0 0; }
+  .jump-group.collapsed .jump-group-buttons { display:none; }
+  .jump-group.collapsed .jump-group-arrow { transform:rotate(0deg); }
+  .jump-btn { width:32px; height:32px; border-radius:5px; font-size:.72rem; padding:0;
+    background:var(--card); border:1px solid var(--border); color:var(--muted); cursor:pointer; }
+  .jump-btn:hover { border-color:var(--accent); color:var(--accent); }
   .jump-btn.answered { background:rgba(59,130,246,.25); border-color:var(--accent); color:var(--text); }
   .jump-btn.current { border-color:var(--accent); color:var(--accent); font-weight:700; }
+  .jump-progress { height:3px; background:var(--border); border-radius:2px; margin-top:3px; overflow:hidden; }
+  .jump-progress-fill { height:100%; background:var(--green); border-radius:2px; transition:width .2s; }
 </style>
 </head>
 <body>
@@ -2960,11 +2972,46 @@ function startQuiz() {
 
 function renderJumpGrid() {
   const grid = document.getElementById('jump-grid');
-  grid.innerHTML = QUESTIONS.map((q,i) => {
-    const ans = answers[q.id];
-    const cls = i === currentQ ? 'jump-btn current' : ans ? 'jump-btn answered' : 'jump-btn';
-    return '<button class="'+cls+'" onclick="goToQ('+i+')">'+q.id+'</button>';
-  }).join('');
+  // Group questions by topic
+  const groups = [];
+  let lastTopic = '';
+  QUESTIONS.forEach((q, i) => {
+    if (q.topic !== lastTopic) {
+      groups.push({ topic: q.topic, items: [] });
+      lastTopic = q.topic;
+    }
+    groups[groups.length - 1].items.push({ q, i });
+  });
+  let html = '';
+  groups.forEach((g, gi) => {
+    const answered = g.items.filter(x => answers[x.q.id]).length;
+    const total = g.items.length;
+    const hasCurrent = g.items.some(x => x.i === currentQ);
+    const collapsed = !hasCurrent && answered === total ? ' collapsed' : '';
+    const pct = total > 0 ? Math.round(answered / total * 100) : 0;
+    html += '<div class="jump-group' + collapsed + '" id="jg-' + gi + '">';
+    html += '<div class="jump-group-header" onclick="toggleGroup(' + gi + ')">';
+    html += '<span class="jump-group-arrow' + (collapsed ? '' : ' open') + '" id="jga-' + gi + '">&#9654;</span>';
+    html += '<span class="jump-group-title">' + g.topic + '</span>';
+    html += '<span class="jump-group-stats">' + answered + '/' + total + '</span>';
+    html += '</div>';
+    html += '<div class="jump-progress"><div class="jump-progress-fill" style="width:' + pct + '%"></div></div>';
+    html += '<div class="jump-group-buttons">';
+    g.items.forEach(x => {
+      const ans = answers[x.q.id];
+      const cls = x.i === currentQ ? 'jump-btn current' : ans ? 'jump-btn answered' : 'jump-btn';
+      html += '<button class="' + cls + '" onclick="goToQ(' + x.i + ')">' + x.q.id + '</button>';
+    });
+    html += '</div></div>';
+  });
+  grid.innerHTML = html;
+}
+
+function toggleGroup(gi) {
+  const el = document.getElementById('jg-' + gi);
+  const arrow = document.getElementById('jga-' + gi);
+  el.classList.toggle('collapsed');
+  arrow.classList.toggle('open');
 }
 
 function goToQ(i) { currentQ = i; renderQuestion(); renderJumpGrid(); }

@@ -2111,7 +2111,7 @@ function renderQuestion() {
   q.options.forEach((opt, i) => {
     const label = ['A','B','C','D'][i];
     const sel = answers[q.id] === label ? ' selected' : '';
-    html += '<div class="option'+sel+'" onclick="selectAnswer('+q.id+",\'"+label+"\',this)"+'">'
+    html += '<div class="option'+sel+'" onclick="selectAnswer('+q.id+',&#39;'+label+'&#39;,this)">';
       + '<span class="option-label">'+label+'</span><span>'+opt+'</span></div>';
   });
   html += '</div></div>';
@@ -2238,8 +2238,8 @@ function renderTeacherList(students) {
     const dt = s.finished_at ? new Date(s.finished_at).toLocaleString('en') : '—';
     html += '<tr><td>'+s.name+'</td><td style="color:var(--muted);font-size:.85rem">'+dt+'</td>'
       + '<td><span class="badge '+bc+'">'+s.score+'/'+s.total+' ('+pct+'%)</span></td>'
-      + '<td><button class="btn-sm btn-outline" onclick="teacherView(\''+encodeURIComponent(s.name)+'\',\''+tkey+'\',false)">View</button>'
-      + '<button class="btn-sm" onclick="teacherView(\''+encodeURIComponent(s.name)+'\',\''+tkey+'\',true)">With answers</button></td></tr>';
+      + '<td><button class="btn-sm btn-outline" onclick="teacherView(&#39;'+encodeURIComponent(s.name)+'&#39;,&#39;''+tkey+'\',false)">View</button>'
+      + '<button class="btn-sm" onclick="teacherView(&#39;'+encodeURIComponent(s.name)+'&#39;,&#39;''+tkey+'\',true)">With answers</button></td></tr>';
   });
   html += '</tbody></table>';
   document.getElementById('teacher-content').innerHTML = html;
@@ -2249,7 +2249,7 @@ function teacherView(enc, tkey, withAnswers) {
   const name = decodeURIComponent(enc);
   document.getElementById('teacher-screen').style.display = 'none';
   document.getElementById('view-screen').style.display = 'block';
-  const back = '<button class="btn-secondary" style="margin-bottom:16px" onclick="location.href=\'/english_check?teacher='+tkey+'\'">← Back to list</button>';
+  const back = '<button class="btn-secondary" style="margin-bottom:16px" onclick="location.href=&#39;/english_check?teacher='+tkey+'&#39;">← Back to list</button>';
   fetch('/english_check/student?name='+encodeURIComponent(name))
     .then(r => r.json()).then(data => {
       if (data.error) { document.getElementById('view-content').innerHTML = back+'<p>Student not found</p>'; return; }

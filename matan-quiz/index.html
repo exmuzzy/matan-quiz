@@ -207,10 +207,9 @@ async function startQuiz() {
 
   try {
     // Load user selections
-    const selRes = await fetch(API + '/matan_topics/load?name=matan');
+    document.title='STEP1'; const selRes = await fetch('/matan_topics/load?name=matan');
     const selData = await selRes.json();
-    // Load questions
-    const qRes = await fetch(API + '/matan_quiz/questions');
+    document.title='STEP2'; const qRes = await fetch('/matan_quiz/questions');
     const qData = await qRes.json();
 
     // Build selected topic indices
@@ -228,6 +227,7 @@ async function startQuiz() {
       }
     }
 
+    console.log('Selected indices:', selectedIndices.size);
     if (selectedIndices.size === 0) {
       document.getElementById('question-container').innerHTML =
         '<p style="color:var(--muted)">Нет выбранных тем. <a href="/matan_topics/" style="color:var(--accent)">Отметьте темы</a> в списке.</p>';
@@ -246,6 +246,7 @@ async function startQuiz() {
       }
     });
 
+    console.log('flatQuestions:', flatQuestions.length);
     if (flatQuestions.length === 0) {
       document.getElementById('question-container').innerHTML =
         '<p style="color:var(--muted)">Для выбранных тем пока нет вопросов.</p>';
@@ -265,11 +266,12 @@ async function startQuiz() {
       if (qi >= 0 && qi < flatQuestions.length) currentQ = qi;
     }
 
+    document.title='STEP3'; console.log('Calling renderQuestion, currentQ:', currentQ, 'flatQ:', flatQuestions.length);
     renderQuestion();
     renderTopicNav();
   } catch(err) {
     document.getElementById('question-container').innerHTML =
-      '<p style="color:var(--red)">Ошибка: ' + err.message + '</p>';
+      '<p style="color:var(--red)">Ошибка: ' + err.message + '<br>' + String(err.stack).replace(/</g,'&lt;') + '</p>';
   }
 }
 
@@ -308,6 +310,10 @@ function selectAnswer(qi, label, el) {
     'Вопрос ' + (currentQ+1) + ' из ' + flatQuestions.length + '  ·  Отвечено: ' + Object.keys(answers).length;
   renderTopicNav();
   try { localStorage.setItem('matan_quiz_answers', JSON.stringify(answers)); } catch(e) {}
+  // Auto-advance after selecting an answer
+  if (currentQ < flatQuestions.length - 1) {
+    setTimeout(function() { currentQ++; renderQuestion(); renderTopicNav(); }, 400);
+  }
 }
 
 function prevQ() { if (currentQ > 0) { currentQ--; renderQuestion(); renderTopicNav(); } }

@@ -299,6 +299,23 @@ function renderQuestion() {
   history.replaceState(null, '', '#q=' + currentQ);
 }
 
+function saveProgress() {
+  if (!studentName || flatQuestions.length === 0) return;
+  var payload = {
+    name: studentName, started_at: startedAt, finished_at: null,
+    in_progress: true, answers: {}, total: flatQuestions.length
+  };
+  flatQuestions.forEach(function(fq, i) {
+    if (answers[i]) payload.answers[fq.idx + '_' + fq.qIndex] = {given: answers[i], correct: fq._answer};
+  });
+  payload.answered = Object.keys(payload.answers).length;
+  payload.score = Object.values(payload.answers).filter(function(a) { return a.given === a.correct; }).length;
+  fetch('/matan_quiz/save', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(payload)
+  }).catch(function() {});
+}
+
 function selectAnswer(qi, label, el) {
   answers[qi] = label;
   document.querySelectorAll('.q-opt').forEach(o => o.classList.remove('selected'));
@@ -307,6 +324,7 @@ function selectAnswer(qi, label, el) {
     'Вопрос ' + (currentQ+1) + ' из ' + flatQuestions.length + '  ·  Отвечено: ' + Object.keys(answers).length;
   renderTopicNav();
   try { localStorage.setItem('matan_quiz_answers', JSON.stringify(answers)); } catch(e) {}
+  saveProgress();
   // Auto-advance after selecting an answer
   if (currentQ < flatQuestions.length - 1) {
     setTimeout(function() { currentQ++; renderQuestion(); renderTopicNav(); }, 400);
@@ -428,28 +446,64 @@ function finishQuiz() {
 function loadTeacher() {
   document.getElementById('name-screen').style.display = 'none';
   document.getElementById('teacher-screen').style.display = 'block';
-  fetch(API + '/matan_quiz/list').then(r => r.json()).then(students => {
+  // Auto-refresh every 10 seconds
+  loadTeacherData();
+  setInterval(loadTeacherData, 10000);
+}
+
+function loadTeacherData() {
+  fetch('/matan_quiz/list').then(r => r.json()).then(students => {
     if (!students.length) {
-      document.getElementById('teacher-content').innerHTML = '<h1>Преподаватель</h1><p style="color:var(--muted);margin-top:16px">Нет данных.</p>';
+      document.getElementById('teacher-content').innerHTML = '<h1>Панель преподавателя — Матанализ</h1><p style="color:var(--muted);margin-top:16px">Нет данных. Ожидание учеников...</p>';
       return;
     }
-    const scores = students.map(s => s.score || 0);
-    const avg = Math.round(scores.reduce((a,b) => a+b, 0) / scores.length);
-    let html = '<h1>Панель преподавателя — Матанализ</h1>';
+    var inProgress = students.filter(s => s.in_progress && !s.finished_at);
+    var finished = students.filter(s => s.finished_at);
+    var all = students;
+    var html = '<h1>Панель преподавателя — Матанализ</h1>';
+
+    // Stats
+    var totalStudents = all.length;
+    var finishedCount = finished.length;
+    var inProgressCount = inProgress.length;
     html += '<div class="stat-row">';
-    html += '<div class="stat-box"><div class="stat-val">' + students.length + '</div><div class="stat-lbl">Учеников</div></div>';
-    html += '<div class="stat-box"><div class="stat-val">' + avg + '%</div><div class="stat-lbl">Средний %</div></div>';
+    html += '<div class="stat-box"><div class="stat-val">' + totalStudents + '</div><div class="stat-lbl">Учеников</div></div>';
+    html += '<div class="stat-box"><div class="stat-val" style="color:var(--accent)">' + inProgressCount + '</div><div class="stat-lbl">Сейчас проходят</div></div>';
+    html += '<div class="stat-box"><div class="stat-val" style="color:var(--green)">' + finishedCount + '</div><div class="stat-lbl">Завершили</div></div>';
     html += '</div>';
-    html += '<table><thead><tr><th>Имя</th><th>Дата</th><th>Баллы</th><th></th></tr></thead><tbody>';
-    students.sort((a,b) => (b.score||0) - (a.score||0)).forEach(s => {
-      const pct = s.total ? Math.round(s.score / s.total * 100) : 0;
-      const bc = pct >= 80 ? 'badge-green' : pct >= 50 ? 'badge-yellow' : 'badge-red';
-      const dt = s.finished_at ? new Date(s.finished_at).toLocaleString('ru') : '—';
-      html += '<tr><td>' + s.name + '</td><td style="color:var(--muted);font-size:.82rem">' + dt + '</td>';
-      html += '<td><span class="badge ' + bc + '">' + (s.score||0) + '/' + (s.total||0) + ' (' + pct + '%)</span></td>';
-      html += '<td><button class="btn-sm btn-outline" onclick="loadStudentView(\'' + encodeURIComponent(s.name) + '\')">Подробнее</button></td></tr>';
-    });
-    html += '</tbody></table>';
+
+    // In-progress students
+    if (inProgress.length > 0) {
+      html += '<h2 style="margin-top:16px;font-size:1rem;color:var(--accent)">Сейчас проходят</h2>';
+      html += '<table><thead><tr><th>Имя</th><th>Прогресс</th><th>Текущий балл</th></tr></thead><tbody>';
+      inProgress.sort((a,b) => (b.answered||0) - (a.answered||0)).forEach(s => {
+        var answered = s.answered || 0;
+        var total = s.total || 1;
+        var score = s.score || 0;
+        var pctDone = Math.round(answered / total * 100);
+        var pctCorrect = answered > 0 ? Math.round(score / answered * 100) : 0;
+        html += '<tr><td><b>' + s.name + '</b></td>';
+        html += '<td><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden;min-width:80px"><div style="height:100%;background:var(--accent);border-radius:4px;width:' + pctDone + '%"></div></div><span style="font-size:.82rem;color:var(--muted);white-space:nowrap">' + answered + ' / ' + total + '</span></div></td>';
+        html += '<td style="font-size:.88rem">' + score + ' верно из ' + answered + ' (' + pctCorrect + '%)</td></tr>';
+      });
+      html += '</tbody></table>';
+    }
+
+    // Finished students
+    if (finished.length > 0) {
+      html += '<h2 style="margin-top:20px;font-size:1rem;color:var(--green)">Завершили</h2>';
+      html += '<table><thead><tr><th>Имя</th><th>Дата</th><th>Результат</th><th></th></tr></thead><tbody>';
+      finished.sort((a,b) => (b.score||0) - (a.score||0)).forEach(s => {
+        var pct = s.total ? Math.round(s.score / s.total * 100) : 0;
+        var bc = pct >= 80 ? 'badge-green' : pct >= 50 ? 'badge-yellow' : 'badge-red';
+        var dt = new Date(s.finished_at).toLocaleString('ru');
+        html += '<tr><td><b>' + s.name + '</b></td><td style="color:var(--muted);font-size:.82rem">' + dt + '</td>';
+        html += '<td><span class="badge ' + bc + '">' + (s.score||0) + '/' + (s.total||0) + ' (' + pct + '%)</span></td>';
+        html += '<td><button class="btn-sm btn-outline" onclick="loadStudentView(&#39;' + encodeURIComponent(s.name) + '&#39;)">Подробнее</button></td></tr>';
+      });
+      html += '</tbody></table>';
+    }
+
     document.getElementById('teacher-content').innerHTML = html;
   });
 }
